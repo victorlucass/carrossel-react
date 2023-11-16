@@ -17,50 +17,59 @@ export function Carrossel({ children, timeRun = 1000 }: CarrosselProps) {
   const slideElementsRef = useRef<HTMLDivElement>(null);
   const slideControlsRef = useRef<HTMLDivElement>(null);
 
-  const [time, setTime] = useState<number>(timeRun);
-  const [index, setIndex] = useState<number>(0);
-  const [slide, setSlide] = useState<Element | null>(null);
-  const [slides, setSlides] = useState<Element[]>([]);
+  const [slides, setSlides] = useState<Element[]>(null);
+  const [index, setIndex] = useState(1);
 
   useEffect(() => {
-    setSlides(Array.from(slideElementsRef.current?.children ?? []));
+    setSlides(Array.from(slideElementsRef?.current?.children ?? []));
   }, []);
 
   useEffect(() => {
-    showSlide(index);
+    show(index);
+  }, [slides, index]);
+
+  useEffect(() => {
     autoPlay();
-  }, [index]);
+  }, [slides, index]);
 
-  const showSlide = (index: number) => {
-    const controls = Array.from(slideControlsRef.current?.children ?? []);
-    setIndex(index);
-    setSlide(slides[index]);
-
-    slides.forEach((el: Element) => {
-      el.classList.remove("active");
-    });
-    controls.forEach((el: Element) => el.classList.remove("active"));
-
-    slideElementsRef.current?.children[index].classList.add("active");
-    controls[index].classList.add("active");
-
-  };
-
-  const nextSlide = () => {
-    if (slides) {
-      if (index < slides.length - 1) {
-        showSlide(index + 1);
-      } else {
-        showSlide(0);
+  function autoPlay() {
+    setTimeout(() => {
+      if (slides) {
+        if (index < slides.length - 1) {
+          handleClick(index + 1);
+        } else {
+          handleClick(0);
+        }
       }
-    }
-  };
-
-  //autoPlay next slide
-  function autoPlay(){
-    setTimeout(() => nextSlide(), time);
+    }, timeRun);
   }
-  
+
+  function show(index: number) {
+    slideElementsRef.current?.children.item(index)?.classList.add("active");
+    slideControlsRef.current?.children.item(index)?.classList.add("active");
+  }
+
+  const handleClick = useCallback((index: number) => {
+    setIndex(index);
+    const slideElements = slideElementsRef.current?.children;
+    const slideElementsControls = slideControlsRef.current?.children;
+
+    //remove class active in slides
+    if (slideElements) {
+      Array.from(slideElements).forEach((slide: Element) => {
+        slide.classList.remove("active");
+      });
+    }
+
+    if (slideElementsControls) {
+      Array.from(slideElementsControls).forEach((slide: Element) => {
+        slide.classList.remove("active");
+      });
+    }
+
+    show(index);
+  }, []);
+
   return (
     <CarrosselContainer ref={slideRef}>
       <CarrosselContainerCard ref={slideElementsRef}>
@@ -68,10 +77,10 @@ export function Carrossel({ children, timeRun = 1000 }: CarrosselProps) {
       </CarrosselContainerCard>
       <Controls ref={slideControlsRef}>
         {slides?.map((_: Element, index: number) => (
-          <ButtonSelected key={index} onClick={() => showSlide(index)} />
+          <ButtonSelected key={index} onClick={() => handleClick(index)} />
         ))}
 
-        <button onClick={nextSlide}>next</button>
+        {/* <button onClick={nextSlide}>next</button> */}
       </Controls>
     </CarrosselContainer>
   );

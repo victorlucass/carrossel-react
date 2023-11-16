@@ -9,7 +9,7 @@ function App() {
   return (
     <AppContainer>
       <StylesGlobal />
-      <Carrossel timeRun={1000}>
+      <Carrossel timeRun={5000}>
         <Table />
         <Grafic />
         <Grafic2 />

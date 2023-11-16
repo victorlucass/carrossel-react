@@ -6,6 +6,7 @@ import {
   CarrosselContainerCard,
   Controls,
 } from "./styles";
+import Timeout from "./class/TimeOut";
 
 interface CarrosselProps {
   children: ReactNode;
@@ -18,7 +19,8 @@ export function Carrossel({ children, timeRun = 1000 }: CarrosselProps) {
   const slideControlsRef = useRef<HTMLDivElement>(null);
 
   const [slides, setSlides] = useState<Element[]>(null);
-  const [index, setIndex] = useState(1);
+  const [index, setIndex] = useState(0);
+  const [timeout, setTimout] = useState<Timeout | null>(null);
 
   useEffect(() => {
     setSlides(Array.from(slideElementsRef?.current?.children ?? []));
@@ -29,19 +31,19 @@ export function Carrossel({ children, timeRun = 1000 }: CarrosselProps) {
   }, [slides, index]);
 
   useEffect(() => {
-    autoPlay();
+    timeout?.clear();
+    // autoPlay();
+    setTimout(new Timeout(autoPlay, timeRun));
   }, [slides, index]);
 
   function autoPlay() {
-    setTimeout(() => {
-      if (slides) {
-        if (index < slides.length - 1) {
-          handleClick(index + 1);
-        } else {
-          handleClick(0);
-        }
+    if (slides) {
+      if (index < slides.length - 1) {
+        handleClick(index + 1);
+      } else {
+        handleClick(0);
       }
-    }, timeRun);
+    }
   }
 
   function show(index: number) {
@@ -79,8 +81,6 @@ export function Carrossel({ children, timeRun = 1000 }: CarrosselProps) {
         {slides?.map((_: Element, index: number) => (
           <ButtonSelected key={index} onClick={() => handleClick(index)} />
         ))}
-
-        {/* <button onClick={nextSlide}>next</button> */}
       </Controls>
     </CarrosselContainer>
   );

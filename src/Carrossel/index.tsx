@@ -6,7 +6,6 @@ import {
   CarrosselContainerCard,
   Controls,
 } from "./styles";
-import Timeout from "./class/TimeOut";
 
 interface CarrosselProps {
   children: ReactNode;
@@ -31,9 +30,14 @@ export function Carrossel({ children, timeRun = 1000 }: CarrosselProps) {
   }, [slides, index]);
 
   useEffect(() => {
-    timeout?.clear();
     // autoPlay();
-    setTimout(new Timeout(autoPlay, timeRun));
+    const set = setTimeout(() => {
+      autoPlay();
+    }, timeRun)
+
+    return () => {
+      clearTimeout(set);
+    }
   }, [slides, index]);
 
   function autoPlay() {
